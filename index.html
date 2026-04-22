@@ -1,0 +1,1001 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>국가기술자격 통합 CBT 모의고사</title>
+    <style>
+        /* 테마 변수 설정 (기본: 라이트 모드) */
+        :root {
+            --bg-color: #f4f6f9;
+            --container-bg: #fff;
+            --text-color: #2c3e50;
+            --muted-color: #7f8c8d;
+            --border-color: #ced4da;
+            --header-bg: #2c3e50;
+            --header-text: #fff;
+            --box-bg: #ecf0f1;
+            --option-bg: #fdfdfd;
+            --option-hover: #f1f3f5;
+            --explain-bg: #eaf2f8;
+            --btn-text: #2c3e50;
+        }
+
+        /* 다크 모드 변수 설정 */
+        body.dark-mode {
+            --bg-color: #121212;
+            --container-bg: #1e1e1e;
+            --text-color: #e0e0e0;
+            --muted-color: #aaa;
+            --border-color: #333;
+            --header-bg: #000000;
+            --header-text: #f1c40f;
+            --box-bg: #2c2c2c;
+            --option-bg: #2a2a2a;
+            --option-hover: #3a3a3a;
+            --explain-bg: #1a252f;
+            --btn-text: #e0e0e0;
+        }
+
+        body { font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; background-color: var(--bg-color); color: var(--text-color); margin: 0; padding: 20px; display: flex; justify-content: center; transition: background-color 0.3s, color 0.3s; overflow-x: hidden; }
+        
+        /* 🌟 인트로 영상 오버레이 스타일 */
+        #intro-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background: #000;
+            z-index: 10000;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+        }
+        
+        #start-intro-btn {
+            padding: 15px 40px;
+            font-size: 24px;
+            font-weight: bold;
+            background: #3498db;
+            color: #fff;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            box-shadow: 0 4px 15px rgba(52, 152, 219, 0.5);
+            transition: transform 0.2s, background-color 0.2s;
+        }
+        
+        #start-intro-btn:hover {
+            transform: scale(1.05);
+            background: #2980b9;
+        }
+
+        #skip-intro-btn {
+            display: none;
+            position: absolute;
+            bottom: 30px;
+            right: 30px;
+            padding: 10px 20px;
+            font-size: 16px;
+            background: rgba(0,0,0,0.6);
+            color: #fff;
+            border: 1px solid rgba(255,255,255,0.5);
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background 0.2s;
+            z-index: 10001;
+        }
+        
+        #skip-intro-btn:hover { background: rgba(0,0,0,0.9); border-color: #fff; }
+
+        /* 🌟 D-Day 계산기 위젯 스타일 */
+        .d-day-widget {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            background: linear-gradient(135deg, #e74c3c, #c0392b);
+            color: #fff;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(231, 76, 60, 0.4);
+            text-align: center;
+            z-index: 9990;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            transition: transform 0.3s, background 0.3s;
+        }
+        .d-day-widget:hover {
+            transform: translateY(-5px);
+        }
+        body.dark-mode .d-day-widget {
+            background: linear-gradient(135deg, #c0392b, #8e44ad);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.6);
+            border-color: rgba(255, 255, 255, 0.1);
+        }
+        .d-day-title { font-size: 13px; font-weight: bold; opacity: 0.9; margin-bottom: 5px; }
+        .d-day-value { font-size: 32px; font-weight: 900; letter-spacing: 2px; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); }
+        .d-day-date { font-size: 12px; opacity: 0.8; margin-top: 8px; background: rgba(0,0,0,0.2); padding: 4px 10px; border-radius: 20px; display: inline-block; font-weight: bold; }
+
+        @media (max-width: 1200px) {
+            .d-day-widget { top: 10px; left: 10px; padding: 10px 15px; }
+            .d-day-value { font-size: 24px; }
+        }
+
+        .cbt-container { 
+            width: 100%; max-width: 850px; background-color: var(--container-bg); border: 1px solid var(--border-color); 
+            box-shadow: 0 4px 15px rgba(0,0,0,0.2); border-radius: 8px; overflow: hidden;
+            position: relative; transition: background-color 0.3s, border-color 0.3s;
+            margin-top: 20px;
+        }
+        
+        .header { background-color: var(--header-bg); color: var(--header-text); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; border-bottom: 4px solid #3498db; transition: background-color 0.3s; }
+        .header-title { font-size: 19px; font-weight: bold; display: flex; align-items: center; gap: 8px; }
+        
+        .logo-icon { width: 24px; height: 24px; fill: #f1c40f; }
+
+        .header-right { display: flex; align-items: center; gap: 15px; }
+        .status-badge { background-color: #3498db; padding: 5px 12px; border-radius: 20px; font-size: 14px; font-weight: bold; color: #fff; }
+        .back-to-home-btn { background-color: #e74c3c; color: white; border: none; padding: 6px 12px; border-radius: 4px; cursor: pointer; font-size: 14px; font-weight: bold; }
+        .back-to-home-btn:hover { background-color: #c0392b; }
+
+        .theme-btn { background: none; border: none; font-size: 22px; cursor: pointer; padding: 0; transition: transform 0.2s; outline: none; }
+        .theme-btn:hover { transform: scale(1.15); }
+
+        .content { padding: 40px 30px; min-height: 450px; }
+        .screen { display: none; text-align: center; }
+        .screen.active { display: block; }
+        
+        h2 { margin-bottom: 30px; color: var(--text-color); text-align: center; font-weight: bold; }
+
+        .login-box { max-width: 400px; margin: 50px auto; padding: 30px; background: var(--box-bg); border-radius: 8px; border: 2px solid var(--border-color); }
+        .login-input { width: 100%; padding: 12px; font-size: 16px; margin-bottom: 15px; border: 1px solid var(--border-color); border-radius: 4px; box-sizing: border-box; background-color: var(--option-bg); color: var(--text-color); }
+        
+        .login-btn { width: 100%; padding: 12px; font-size: 16px; font-weight: bold; color: #fff; background-color: #3498db; border: none; border-radius: 4px; cursor: pointer; transition: background-color 0.2s; margin-bottom: 10px; }
+        .login-btn:hover { background-color: #2980b9; }
+        
+        .guest-btn { background-color: #95a5a6; margin-bottom: 0; }
+        .guest-btn:hover { background-color: #7f8c8d; }
+
+        .btn-grid { display: flex; flex-direction: column; gap: 15px; align-items: center; }
+        .exam-btn { display: block; width: 100%; max-width: 450px; padding: 20px; background-color: var(--box-bg); border: 2px solid var(--border-color); border-radius: 8px; font-size: 18px; font-weight: bold; color: var(--btn-text); cursor: pointer; transition: all 0.2s; }
+        .exam-btn:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        
+        body:not(.dark-mode) .exam-btn.elec { background-color: #eaf2f8; border-color: #a9cce3; color: #154360; }
+        body:not(.dark-mode) .exam-btn.electro { background-color: #e8f8f5; border-color: #a3e4d7; color: #0e6251; }
+        body:not(.dark-mode) .exam-btn.elev { background-color: #fef9e7; border-color: #f9e79f; color: #7d6608; }
+        
+        body.dark-mode .exam-btn.elec { border-color: #3498db; color: #3498db; }
+        body.dark-mode .exam-btn.electro { border-color: #1abc9c; color: #1abc9c; }
+        body.dark-mode .exam-btn.elev { border-color: #f1c40f; color: #f1c40f; }
+
+        .status-text { display: block; margin-top: 5px; font-size: 15px; font-weight: bold; color: var(--text-color); }
+
+        .history-panel {
+            position: fixed;
+            top: 75px;
+            right: -320px;
+            width: 280px;
+            background-color: var(--container-bg);
+            border: 2px solid var(--border-color);
+            box-shadow: -4px 0 15px rgba(0,0,0,0.3);
+            border-radius: 8px 0 0 8px;
+            padding: 20px;
+            transition: right 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            z-index: 1000;
+            max-height: calc(100vh - 120px);
+            overflow-y: auto;
+        }
+        .history-panel.open { right: 0; }
+        .history-header { display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #3498db; padding-bottom: 10px; margin-bottom: 15px; }
+        .history-header h3 { margin: 0; color: var(--text-color); font-size: 18px; }
+        .history-close-btn { background: none; border: none; font-size: 20px; color: var(--muted-color); cursor: pointer; transition: color 0.2s; }
+        .history-close-btn:hover { color: #e74c3c; }
+        
+        .history-item { margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px dashed var(--border-color); }
+        .history-item-title { font-weight: bold; color: #3498db; margin-bottom: 8px; font-size: 15px; display: flex; align-items: center; gap: 5px; }
+        .history-record { font-size: 13px; color: var(--text-color); margin-bottom: 5px; padding-left: 10px; border-left: 3px solid var(--border-color); }
+        .history-record.pass { border-left-color: #2ecc71; }
+        .history-record.fail { border-left-color: #e74c3c; }
+        .history-record strong { font-size: 14px; }
+        .pass-text { color: #2ecc71; font-weight: bold; }
+        .fail-text { color: #e74c3c; font-weight: bold; }
+
+        .history-toggle-btn {
+            position: fixed;
+            top: 90px;
+            right: 0;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 8px 0 0 8px;
+            cursor: pointer;
+            font-weight: bold;
+            z-index: 999;
+            box-shadow: -2px 2px 10px rgba(0,0,0,0.1);
+            transition: right 0.3s;
+            display: none; 
+        }
+        .history-toggle-btn:hover { background-color: #2980b9; }
+
+        .timer-container { width: 100%; height: 35px; background-color: var(--box-bg); border-radius: 8px; margin-bottom: 25px; overflow: hidden; border: 2px solid var(--border-color); position: relative; display: none; }
+        .timer-bar { height: 100%; width: 0%; background-color: #2ecc71; transition: width 1s linear, background-color 1s; }
+        .timer-text { position: absolute; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; font-size: 18px; font-weight: 900; color: #2c3e50; text-shadow: 1px 1px 2px rgba(255,255,255,0.8); }
+
+        @keyframes sirenAlert { 0% { box-shadow: inset 0 0 0px rgba(231, 76, 60, 0); background-color: var(--container-bg); } 50% { box-shadow: inset 0 0 80px rgba(231, 76, 60, 0.4); background-color: #5a1e1e; } 100% { box-shadow: inset 0 0 0px rgba(231, 76, 60, 0); background-color: var(--container-bg); } }
+        .danger-mode { animation: sirenAlert 0.8s infinite; }
+
+        @keyframes shakeScreen { 0% { transform: translate(2px, 2px) rotate(0deg); } 10% { transform: translate(-2px, -3px) rotate(-1deg); } 20% { transform: translate(-4px, 0px) rotate(1deg); } 30% { transform: translate(4px, 3px) rotate(0deg); } 40% { transform: translate(2px, -2px) rotate(1deg); } 50% { transform: translate(-2px, 3px) rotate(-1deg); } 60% { transform: translate(-4px, 2px) rotate(0deg); } 70% { transform: translate(4px, 2px) rotate(-1deg); } 80% { transform: translate(-2px, -2px) rotate(1deg); } 90% { transform: translate(2px, 3px) rotate(0deg); } 100% { transform: translate(2px, -3px) rotate(-1deg); } }
+        .shake-effect { animation: shakeScreen 0.5s ease-in-out; }
+
+        .explosion-overlay { position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.9); z-index: 9999; display: none; flex-direction: column; justify-content: center; align-items: center; }
+        @keyframes boomAnim { 0% { transform: scale(0.5); opacity: 0; } 30% { transform: scale(2.5); opacity: 1; } 70% { transform: scale(2.0); opacity: 1; } 100% { transform: scale(1.5); opacity: 0; } }
+        .explosion-emoji { font-size: 150px; animation: boomAnim 1.5s ease-out forwards; }
+        .explosion-text { color: #e74c3c; font-size: 40px; font-weight: 900; text-shadow: 0 0 10px #000; margin-top: 20px; }
+
+        #quiz-screen { text-align: left; }
+        .difficulty-badge { display: inline-block; padding: 4px 10px; border-radius: 4px; font-size: 13px; font-weight: bold; margin-bottom: 12px; color: #fff; }
+        .diff-easy { background-color: #2ecc71; }
+        .diff-medium { background-color: #f39c12; }
+        .diff-hard { background-color: #e74c3c; }
+
+        .question-text { font-size: 19px; font-weight: bold; color: var(--text-color); margin-bottom: 25px; line-height: 1.5; }
+        
+        .svg-wrap { text-align: center; margin: 20px 0; padding: 15px; background: #fff; border: 1px solid var(--border-color); border-radius: 4px; }
+        .svg-wrap svg { max-width: 320px; width: 100%; height: auto; overflow: visible; font-family: 'Malgun Gothic', '맑은 고딕', sans-serif; }
+
+        .options-list { list-style: none; padding: 0; margin: 0; }
+        .options-list li { margin-bottom: 12px; }
+        .option-label { display: flex; align-items: center; padding: 15px 20px; background-color: var(--option-bg); border: 2px solid var(--border-color); border-radius: 6px; cursor: pointer; font-size: 17px; transition: background-color 0.2s; color: var(--text-color); }
+        .option-label:hover:not(.disabled) { background-color: var(--option-hover); }
+        .option-label.disabled { cursor: default; }
+        .option-label input[type="radio"] { margin-right: 15px; transform: scale(1.3); cursor: pointer; }
+        
+        body:not(.dark-mode) .option-label.correct { background-color: #d4edda; border-color: #28a745; color: #155724; font-weight: bold; }
+        body:not(.dark-mode) .option-label.incorrect { background-color: #f8d7da; border-color: #dc3545; color: #721c24; }
+        body.dark-mode .option-label.correct { background-color: #1a4225; border-color: #2ecc71; color: #2ecc71; font-weight: bold; }
+        body.dark-mode .option-label.incorrect { background-color: #4a191e; border-color: #e74c3c; color: #e74c3c; }
+
+        .explanation-box { margin-top: 25px; padding: 20px; background-color: var(--explain-bg); border-left: 5px solid #3498db; border-radius: 4px; font-size: 16px; line-height: 1.6; color: var(--text-color); display: none; }
+        .explanation-box strong { color: #3498db; font-size: 18px; display: block; margin-bottom: 10px; }
+
+        .footer { background-color: var(--box-bg); padding: 20px 30px; display: flex; justify-content: flex-end; align-items: center; border-top: 1px solid var(--border-color); }
+        .nav-btn { padding: 12px 25px; font-size: 16px; font-weight: bold; border: none; border-radius: 5px; cursor: pointer; color: #fff; transition: background-color 0.2s; }
+        .nav-btn.next { background-color: #3498db; }
+        .nav-btn.next:hover { background-color: #2980b9; }
+        .nav-btn.next:disabled { background-color: #bdc3c7; cursor: not-allowed; }
+        .progress-indicator { font-size: 18px; font-weight: bold; color: var(--text-color); margin-right: 20px; }
+
+        .result-score { font-size: 60px; font-weight: 900; color: #3498db; margin: 20px 0; }
+        .result-message { font-size: 22px; color: var(--text-color); margin-bottom: 30px; line-height: 1.5; }
+        .retake-btn { background-color: #f39c12; color: white; border: none; padding: 12px 25px; font-size: 16px; font-weight: bold; border-radius: 5px; cursor: pointer; margin-right: 10px; }
+    </style>
+</head>
+<body>
+
+<div id="intro-overlay">
+    <button id="start-intro-btn" onclick="playIntro()">CBT 시스템 입장하기</button>
+    <video id="intro-video" src="-OqDbBFcGpPM_D0sjEWW_Dropshot.mp4" controls style="display: none; width: 100%; max-height: 80vh; object-fit: contain;" playsinline></video>
+    <button id="skip-intro-btn" onclick="endIntro()">Skip ⏭</button>
+</div>
+
+<div class="d-day-widget" id="d-day-widget">
+    <div class="d-day-title">전기기능사 시험</div>
+    <div class="d-day-value" id="d-day-value">계산중...</div>
+    <div class="d-day-date">5월 9일</div>
+</div>
+
+<button class="history-toggle-btn" id="history-toggle-btn" onclick="toggleHistoryPanel()">📜 기록 보기</button>
+
+<div class="history-panel" id="history-panel">
+    <div class="history-header">
+        <h3>📝 내 응시 기록</h3>
+        <button class="history-close-btn" onclick="toggleHistoryPanel('hide')">✖</button>
+    </div>
+    <div id="history-content">
+        </div>
+</div>
+
+<div class="cbt-container" id="main-container">
+    
+    <div class="explosion-overlay" id="explosion-screen">
+        <div class="explosion-emoji">💥</div>
+        <div class="explosion-text">TIME OVER!</div>
+    </div>
+
+    <div class="header">
+        <div class="header-title">
+            <svg class="logo-icon" viewBox="0 0 24 24">
+                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/>
+            </svg>
+            국가기술자격 통합 CBT 모의고사
+        </div>
+        <div class="header-right">
+            <button class="theme-btn" id="theme-btn" onclick="toggleTheme()" title="다크/라이트 모드 전환">🌙</button>
+            <span id="user-greeting" style="display:none; font-size:15px; font-weight:bold; color:#f1c40f;"></span>
+            <button class="back-to-home-btn" id="logout-btn" style="display:none; background-color:#7f8c8d;" onclick="logout()">로그아웃</button>
+            <span class="status-badge" id="header-status" style="display:none;">대기 중</span>
+            <button class="back-to-home-btn" id="home-btn" style="display:none;" onclick="goHome()">메인으로 가기</button>
+        </div>
+    </div>
+
+    <div class="content screen active" id="login-screen">
+        <h2>CBT 시스템 로그인</h2>
+        <div class="login-box">
+            <input type="text" id="userid" class="login-input" placeholder="아이디를 입력하세요" onkeypress="if(event.keyCode==13) login();">
+            <button class="login-btn" onclick="login()">접속하기</button>
+            <button class="login-btn guest-btn" onclick="loginAsGuest()">비회원으로 로그인하기</button>
+        </div>
+    </div>
+
+    <div class="content screen" id="exam-select-screen">
+        <div class="btn-grid" id="exam-btn-container"></div>
+    </div>
+
+    <div class="content screen" id="quiz-screen">
+        <div class="timer-container" id="timer-container">
+            <div class="timer-bar" id="timer-bar"></div>
+            <div class="timer-text" id="timer-text">01:00</div>
+        </div>
+
+        <span id="q-difficulty" class="difficulty-badge">난이도</span>
+        <div class="question-text" id="q-text"></div>
+        <ul class="options-list" id="options-list"></ul>
+        <div class="explanation-box" id="explanation">
+            <strong>💡 정답 및 해설</strong>
+            <span id="exp-text"></span>
+        </div>
+    </div>
+
+    <div class="content screen" id="result-screen">
+        <h2>시험 종료!</h2>
+        <div class="result-score" id="final-score">0 점</div>
+        <div class="result-message" id="result-msg"></div>
+        <div>
+            <button class="retake-btn" onclick="resetAndRetake()">다시 풀기</button>
+            <button class="exam-btn elec" style="display:inline-block; width:auto; padding:12px 25px; margin:0; border-color:#bdc3c7;" onclick="goHome()">메인으로 돌아가기</button>
+        </div>
+    </div>
+
+    <div class="footer" id="quiz-footer" style="display: none;">
+        <div class="progress-indicator" id="progress-text">1 / 20</div>
+        <button class="nav-btn next" id="next-btn" onclick="goNext()" disabled>정답을 선택하세요</button>
+    </div>
+</div>
+
+<script>
+    // D-Day 계산 로직
+    function calculateDDay() {
+        const now = new Date();
+        const currentYear = now.getFullYear();
+        let targetDate = new Date(currentYear, 4, 9);
+        
+        now.setHours(0, 0, 0, 0);
+        targetDate.setHours(0, 0, 0, 0);
+        
+        const diffTime = targetDate.getTime() - now.getTime();
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        
+        const dDayValue = document.getElementById('d-day-value');
+        if (diffDays > 0) {
+            dDayValue.innerText = `D-${diffDays}`;
+        } else if (diffDays === 0) {
+            dDayValue.innerText = `D-Day!`;
+        } else {
+            dDayValue.innerText = `D+${Math.abs(diffDays)}`;
+        }
+    }
+    
+    calculateDDay();
+
+    // 인트로 영상 제어 로직
+    function playIntro() {
+        document.getElementById('start-intro-btn').style.display = 'none';
+        const vid = document.getElementById('intro-video');
+        vid.style.display = 'block';
+        document.getElementById('skip-intro-btn').style.display = 'block';
+        
+        let playPromise = vid.play();
+        
+        if (playPromise !== undefined) {
+            playPromise.then(_ => {
+            }).catch(error => {
+                console.error("영상 재생 실패 원인: ", error);
+                alert("영상을 불러오지 못했습니다!\n\n1. 다운로드 받은 영상 파일 이름이 '-OqDbBFcGpPM_D0sjEWW_Dropshot.mp4'가 맞는지 확인해 주세요.\n2. HTML 파일과 동영상 파일이 같은 폴더에 있어야 합니다.\n\n재생할 수 없어 바로 로그인 창으로 넘어갑니다.");
+                endIntro();
+            });
+        }
+        vid.onended = endIntro;
+    }
+
+    function endIntro() {
+        const overlay = document.getElementById('intro-overlay');
+        const vid = document.getElementById('intro-video');
+        
+        vid.pause();
+        overlay.style.transition = "opacity 0.6s ease";
+        overlay.style.opacity = "0";
+        
+        setTimeout(() => {
+            overlay.style.display = "none";
+        }, 600);
+    }
+
+    // 테마 토글
+    function toggleTheme() {
+        document.body.classList.toggle('dark-mode');
+        const isDark = document.body.classList.contains('dark-mode');
+        document.getElementById('theme-btn').innerText = isDark ? '☀️' : '🌙';
+        localStorage.setItem('cbtTheme', isDark ? 'dark' : 'light');
+    }
+
+    if(localStorage.getItem('cbtTheme') === 'dark') {
+        document.body.classList.add('dark-mode');
+        document.getElementById('theme-btn').innerText = '☀️';
+    } else {
+        document.getElementById('theme-btn').innerText = '🌙';
+    }
+
+    // 도면 데이터 (SVG)
+    const svg_bridge = `<div class="svg-wrap"><svg viewBox="0 0 240 200"><polygon points="120,30 200,100 120,170 40,100" fill="none" stroke="#000" stroke-width="2"/><rect x="65" y="55" width="30" height="20" fill="#fff" stroke="#000" stroke-width="2" transform="rotate(45 80 65)"/><text x="60" y="45" font-weight="bold">2Ω</text><rect x="145" y="55" width="30" height="20" fill="#fff" stroke="#000" stroke-width="2" transform="rotate(-45 160 65)"/><text x="160" y="45" font-weight="bold">4Ω</text><rect x="65" y="125" width="30" height="20" fill="#fff" stroke="#000" stroke-width="2" transform="rotate(-45 80 135)"/><text x="60" y="165" font-weight="bold">3Ω</text><rect x="145" y="125" width="30" height="20" fill="#fff" stroke="#000" stroke-width="2" transform="rotate(45 160 135)"/><text x="160" y="165" font-weight="bold">R</text><line x1="40" y1="100" x2="200" y2="100" stroke="#000" stroke-width="1.5"/><circle cx="120" cy="100" r="15" fill="#fff" stroke="#000" stroke-width="2"/><text x="113" y="105" font-weight="bold" font-size="14">G</text><line x1="10" y1="100" x2="40" y2="100" stroke="#000" stroke-width="2"/><line x1="200" y1="100" x2="230" y2="100" stroke="#000" stroke-width="2"/><circle cx="10" cy="100" r="3" fill="#000"/><circle cx="230" cy="100" r="3" fill="#000"/><text x="0" y="90" font-weight="bold">A</text><text x="225" y="90" font-weight="bold">B</text></svg></div>`;
+    const svg_ac_wave = `<div class="svg-wrap"><svg viewBox="-20 -20 260 160"><line x1="0" y1="60" x2="220" y2="60" stroke="#000" stroke-width="1.5"/><line x1="20" y1="0" x2="20" y2="120" stroke="#000" stroke-width="1.5"/><polygon points="20,-5 15,5 25,5" fill="#000"/><polygon points="225,60 215,55 215,65" fill="#000"/><path d="M 20 60 Q 70 -40 120 60 T 220 60" fill="none" stroke="#000" stroke-width="2.5"/><line x1="20" y1="15" x2="70" y2="15" stroke="#000" stroke-width="1" stroke-dasharray="4"/><text x="25" y="10" font-weight="bold">Vm (100V)</text><text x="115" y="80">π</text><text x="210" y="80">2π</text><text x="230" y="65">t</text><text x="5" y="10">v</text></svg></div>`;
+    const svg_fleming = `<div class="svg-wrap"><svg viewBox="0 0 240 140"><rect x="10" y="20" width="40" height="100" fill="none" stroke="#000" stroke-width="2"/><text x="22" y="75" font-weight="bold" font-size="20">N</text><rect x="190" y="20" width="40" height="100" fill="none" stroke="#000" stroke-width="2"/><text x="203" y="75" font-weight="bold" font-size="20">S</text><line x1="50" y1="70" x2="190" y2="70" stroke="#000" stroke-width="1.5" stroke-dasharray="6,4"/><polygon points="180,65 190,70 180,75" fill="#000"/><text x="130" y="60" font-weight="bold">B (자속)</text><circle cx="120" cy="70" r="15" fill="#fff" stroke="#000" stroke-width="2"/><line x1="110" y1="60" x2="130" y2="80" stroke="#000" stroke-width="2"/><line x1="130" y1="60" x2="110" y2="80" stroke="#000" stroke-width="2"/><text x="145" y="85" font-weight="bold">I (전류)</text><line x1="120" y1="55" x2="120" y2="10" stroke="#000" stroke-width="2.5"/><polygon points="115,20 120,10 125,20" fill="#000"/><text x="130" y="25" font-weight="bold">F (힘)</text></svg></div>`;
+    const svg_transformer = `<div class="svg-wrap"><svg viewBox="0 0 200 120"><path d="M 50,60 L 70,60 M 70,60 L 70,30 M 70,60 L 90,80 M 70,60 L 50,80" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round"/><polygon points="150,30 130,70 170,70" fill="none" stroke="#000" stroke-width="3" stroke-linejoin="round"/><line x1="95" y1="60" x2="120" y2="60" stroke="#000" stroke-width="1" stroke-dasharray="3"/></svg></div>`;
+    const svg_rectifier = `<div class="svg-wrap"><svg viewBox="0 0 240 140"><polygon points="120,20 170,70 120,120 70,70" fill="none" stroke="#000" stroke-width="1.5"/><polygon points="90,45 105,40 100,55" fill="#000"/><line x1="102" y1="38" x2="90" y2="50" stroke="#000" stroke-width="2"/><polygon points="140,45 150,55 135,50" fill="#000"/><line x1="138" y1="58" x2="150" y2="46" stroke="#000" stroke-width="2"/><polygon points="90,95 100,85 105,100" fill="#000"/><line x1="102" y1="102" x2="90" y2="90" stroke="#000" stroke-width="2"/><polygon points="140,95 135,90 150,85" fill="#000"/><line x1="138" y1="82" x2="150" y2="94" stroke="#000" stroke-width="2"/><text x="10" y="75" font-weight="bold">AC</text><line x1="40" y1="70" x2="70" y2="70" stroke="#000" stroke-width="1.5"/><line x1="170" y1="70" x2="200" y2="70" stroke="#000" stroke-width="1.5"/><text x="210" y="75" font-weight="bold">DC</text><circle cx="40" cy="70" r="3" fill="#000"/><circle cx="200" cy="70" r="3" fill="#000"/></svg></div>`;
+    const svg_ground = `<div class="svg-wrap"><svg viewBox="0 0 100 100"><line x1="50" y1="10" x2="50" y2="50" stroke="#000" stroke-width="3"/><line x1="20" y1="50" x2="80" y2="50" stroke="#000" stroke-width="3"/><line x1="30" y1="65" x2="70" y2="65" stroke="#000" stroke-width="3"/><line x1="40" y1="80" x2="60" y2="80" stroke="#000" stroke-width="3"/></svg></div>`;
+    const svg_nand = `<div class="svg-wrap"><svg viewBox="0 0 160 100"><path d="M 50,20 L 70,20 A 30,30 0 0,1 70,80 L 50,80 Z" fill="none" stroke="#000" stroke-width="2.5"/><circle cx="106" cy="50" r="6" fill="#fff" stroke="#000" stroke-width="2.5"/><line x1="20" y1="35" x2="50" y2="35" stroke="#000" stroke-width="2"/><line x1="20" y1="65" x2="50" y2="65" stroke="#000" stroke-width="2"/><line x1="112" y1="50" x2="140" y2="50" stroke="#000" stroke-width="2"/><text x="5" y="40" font-family="Arial" font-weight="bold">A</text><text x="5" y="70" font-family="Arial" font-weight="bold">B</text><text x="145" y="55" font-family="Arial" font-weight="bold">Y</text></svg></div>`;
+    const svg_osc = `<div class="svg-wrap"><svg viewBox="0 0 200 140"><rect x="10" y="10" width="180" height="100" fill="#fff" stroke="#000" stroke-width="2"/><path d="M 10,35 L 190,35 M 10,60 L 190,60 M 10,85 L 190,85 M 55,10 L 55,110 M 100,10 L 100,110 M 145,10 L 145,110" stroke="#ddd" stroke-width="1"/><line x1="10" y1="60" x2="190" y2="60" stroke="#000" stroke-width="1"/><line x1="100" y1="10" x2="100" y2="110" stroke="#000" stroke-width="1"/><path d="M 10,60 Q 32.5,10 55,60 T 100,60 T 145,60 T 190,60" fill="none" stroke="#000" stroke-width="2.5"/><text x="50" y="130" font-size="12" font-weight="bold">※ V/DIV = 2V, TIME/DIV = 1ms</text></svg></div>`;
+    const svg_lpf = `<div class="svg-wrap"><svg viewBox="0 0 240 120"><line x1="30" y1="30" x2="70" y2="30" stroke="#000" stroke-width="2"/><rect x="70" y="20" width="40" height="20" fill="#fff" stroke="#000" stroke-width="2"/><text x="85" y="15" font-weight="bold">R</text><line x1="110" y1="30" x2="150" y2="30" stroke="#000" stroke-width="2"/><line x1="150" y1="30" x2="180" y2="30" stroke="#000" stroke-width="2"/><line x1="150" y1="30" x2="150" y2="50" stroke="#000" stroke-width="2"/><line x1="135" y1="50" x2="165" y2="50" stroke="#000" stroke-width="2.5"/><line x1="135" y1="60" x2="165" y2="60" stroke="#000" stroke-width="2.5"/><line x1="150" y1="60" x2="150" y2="80" stroke="#000" stroke-width="2"/><text x="175" y="60" font-weight="bold">C</text><line x1="30" y1="80" x2="180" y2="80" stroke="#000" stroke-width="2"/><circle cx="30" cy="30" r="3"/><circle cx="30" cy="80" r="3"/><circle cx="180" cy="30" r="3"/><circle cx="180" cy="80" r="3"/><text x="5" y="60" font-weight="bold">Vi</text><text x="190" y="60" font-weight="bold">Vo</text></svg></div>`;
+    const svg_schmitt = `<div class="svg-wrap"><svg viewBox="0 0 200 120"><polygon points="60,20 140,60 60,100" fill="#fff" stroke="#000" stroke-width="2"/><polyline points="85,70 85,50 105,50 105,70" fill="none" stroke="#000" stroke-width="1.5"/><line x1="75" y1="70" x2="105" y2="70" stroke="#000" stroke-width="1.5"/><line x1="85" y1="50" x2="115" y2="50" stroke="#000" stroke-width="1.5"/><line x1="20" y1="40" x2="60" y2="40" stroke="#000" stroke-width="2"/><text x="35" y="35">+</text><line x1="20" y1="80" x2="60" y2="80" stroke="#000" stroke-width="2"/><text x="35" y="75">-</text><line x1="140" y1="60" x2="180" y2="60" stroke="#000" stroke-width="2"/></svg></div>`;
+    const svg_am = `<div class="svg-wrap"><svg viewBox="0 0 240 120"><path d="M 20,60 Q 70,20 120,60 T 220,60" fill="none" stroke="#000" stroke-width="1.5" stroke-dasharray="4"/><path d="M 20,60 Q 70,100 120,60 T 220,60" fill="none" stroke="#000" stroke-width="1.5" stroke-dasharray="4"/><path d="M 20,60 L 25,50 L 30,70 L 35,45 L 40,75 L 45,40 L 50,80 L 55,38 L 60,82 L 65,36 L 70,84 L 75,36 L 80,82 L 85,38 L 90,80 L 95,40 L 100,75 L 105,45 L 110,70 L 115,50 L 120,60 L 125,70 L 130,50 L 135,75 L 140,45 L 145,80 L 150,40 L 155,82 L 160,38 L 165,84 L 170,36 L 175,84 L 180,36 L 185,82 L 190,38 L 195,80 L 200,40 L 205,75 L 210,45 L 215,70 L 220,60" fill="none" stroke="#000" stroke-width="1"/></svg></div>`;
+    const svg_rope21 = `<div class="svg-wrap"><svg viewBox="0 0 200 220"><line x1="40" y1="20" x2="160" y2="20" stroke="#000" stroke-width="4"/><circle cx="100" cy="40" r="16" fill="#fff" stroke="#000" stroke-width="2"/><rect x="50" y="120" width="40" height="30" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="70" cy="110" r="10" fill="#fff" stroke="#000" stroke-width="2"/><rect x="130" y="100" width="20" height="50" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="140" cy="90" r="10" fill="#fff" stroke="#000" stroke-width="2"/><line x1="60" y1="20" x2="60" y2="110" stroke="#000" stroke-width="1.5"/><line x1="80" y1="110" x2="88" y2="50" stroke="#000" stroke-width="1.5"/><line x1="112" y1="50" x2="130" y2="90" stroke="#000" stroke-width="1.5"/><line x1="150" y1="90" x2="150" y2="20" stroke="#000" stroke-width="1.5"/></svg></div>`;
+    const svg_t_rail = `<div class="svg-wrap"><svg viewBox="0 0 160 160"><polygon points="50,110 110,110 110,30 120,30 120,120 40,120 40,30 50,30" fill="#ddd" stroke="#000" stroke-width="2"/><line x1="30" y1="115" x2="130" y2="115" stroke="#000" stroke-width="1" stroke-dasharray="4"/></svg></div>`;
+    const svg_ban = `<div class="svg-wrap"><svg viewBox="0 0 140 140"><circle cx="70" cy="70" r="50" fill="none" stroke="#e74c3c" stroke-width="10"/><line x1="35" y1="35" x2="105" y2="105" stroke="#e74c3c" stroke-width="10"/></svg></div>`;
+    const svg_gov = `<div class="svg-wrap"><svg viewBox="0 0 160 220"><circle cx="80" cy="40" r="20" fill="#fff" stroke="#000" stroke-width="2"/><circle cx="80" cy="160" r="16" fill="#fff" stroke="#000" stroke-width="2"/><line x1="60" y1="40" x2="64" y2="160" stroke="#000" stroke-width="1.5"/><line x1="100" y1="40" x2="96" y2="160" stroke="#000" stroke-width="1.5"/><rect x="55" y="95" width="10" height="15" fill="#000"/></svg></div>`;
+
+    // 🌟 교차 검증 및 정답이 수정된 문제 데이터베이스
+    const db = {
+        "전기기능사": [
+            {lvl: 1, q:"전하량(전기량)의 단위로 옳은 것은?", o:["A (암페어)","C (쿨롱)","V (볼트)","W (와트)"], a:1, e:"전류는 A, 전압은 V, 전하량은 C(쿨롱)입니다."},
+            {lvl: 1, q:"옴의 법칙을 바르게 나타낸 식은?", o:["V = I × R","I = V × R","R = V × I","P = V / R"], a:0, e:"V(전압) = I(전류) × R(저항) 입니다."},
+            {lvl: 1, q:`전기 도면에서 다음 심벌이 의미하는 것은?${svg_ground}`, o:["스위치","접지 (Earth)","콘덴서","피뢰기"], a:1, e:"대지(Earth)와 연결하여 이상 전류를 땅으로 흘려보내는 접지 심벌입니다."},
+            {lvl: 1, q:"비닐 절연 전선을 나타내는 약호는?", o:["DV","IV","OW","CV"], a:1, e:"IV (Indoor PVC)는 옥내 배선용 비닐 절연 전선입니다."},
+            {lvl: 1, q:`그림과 같은 정현파 교류 전압의 실효값(Vrms)은 약 몇 V인가?${svg_ac_wave}`, o:["50V","63.6V","70.7V","141.4V"], a:2, e:"실효값은 최댓값(100V)을 √2로 나눈 70.7V 입니다. (평균값은 약 63.6V)"},
+            {lvl: 1, q:`자기장 속의 도체에 전류가 흐를 때 도체가 받는 힘의 방향을 구하는 법칙은?${svg_fleming}`, o:["앙페르의 오른나사 법칙","패러데이의 전자기 유도 법칙","플레밍의 오른손 법칙","플레밍의 왼손 법칙"], a:3, e:"전동기의 원리로 사용되는 플레밍의 왼손 법칙입니다."},
+            {lvl: 2, q:"10Ω 저항 2개를 병렬로 연결할 때의 합성 저항은?", o:["5Ω","10Ω","15Ω","20Ω"], a:0, e:"같은 저항 2개를 병렬로 연결하면 저항값은 절반(5Ω)이 됩니다."},
+            {lvl: 2, q:"줄의 법칙에서 발생하는 열량 H를 구하는 공식은? (cal)", o:["0.24 I²Rt","0.24 VIt","I²Rt","VIt"], a:0, e:"열량 H = 0.24 × 전력(W) × 시간(s) = 0.24 I²Rt 입니다."},
+            {lvl: 2, q:"키르히호프의 제2법칙은 무엇에 관한 법칙인가?", o:["전류","전압","저항","전력"], a:1, e:"제1법칙은 전류 법칙, 제2법칙은 폐회로 내의 '전압 법칙'입니다."},
+            {lvl: 2, q:`다이오드 4개를 브리지 형태로 결선한 다음 정류 회로의 명칭은?${svg_rectifier}`, o:["단상 반파 정류회로","단상 전파 정류회로","3상 반파 정류회로","배전압 정류회로"], a:1, e:"교류의 양의 주기와 음의 주기를 모두 직류로 변환하는 단상 전파 브리지 정류회로입니다."},
+            {lvl: 2, q:"극수 4, 주파수 60Hz인 3상 유도전동기의 동기속도는?", o:["1200rpm","1500rpm","1800rpm","3600rpm"], a:2, e:"Ns = (120 × f) / P = (120 × 60) / 4 = 1800rpm 입니다."},
+            {lvl: 2, q:"금속관 구부릴 때 안쪽 곡률 반지름은 관 안지름의 최소 몇 배인가?", o:["2배","4배","6배","10배"], a:2, e:"전선 피복 손상을 막기 위해 6배 이상으로 완만하게 구부립니다."},
+            {lvl: 2, q:"애자사용 공사에서 전선 상호 간의 이격 거리는 최소 몇 cm인가?", o:["2.5cm","4.5cm","6cm","10cm"], a:2, e:"합선 방지를 위해 전선 상호 간 이격 거리는 최소 6cm 이상입니다."},
+            {lvl: 2, q:`도면과 같은 변압기 3상 결선 방식의 명칭은?${svg_transformer}`, o:["Y-Y 결선","Δ-Δ 결선","Y-Δ 결선","V-V 결선"], a:2, e:"좌측은 한 점에서 만나는 성형(Y) 결선, 우측은 폐회로를 구성하는 델타(Δ) 결선입니다."},
+            
+            // 🌟 수정 완료: 브리지 회로의 정답 6Ω 및 해설 일치 작업
+            {lvl: 3, q:`다음 회로는 브리지 회로이다. 검류계(G)에 전류가 흐르지 않을 때 미지의 저항 R의 값은?${svg_bridge}`, o:["2Ω","4Ω","6Ω","8Ω"], a:2, e:"브리지 평형 조건: 대각선 방향 저항의 곱이 같습니다. 식에 대입하면 2 × R = 4 × 3 이므로 2R = 12, 즉 R = 6Ω 입니다."},
+            
+            {lvl: 3, q:"대칭 3상 Y결선 회로에서 선간 전압과 상전압의 관계는?", o:["선간전압 = 상전압","선간전압 = √3 × 상전압","상전압 = √3 × 선간전압","선간전압 = 3 × 상전압"], a:1, e:"Y결선에서 선간전압은 상전압보다 크기가 √3배 크고, 위상은 30도 앞섭니다."},
+            {lvl: 3, q:"변압기의 철손이 200W, 정격 부하 동손이 800W일 때 최대 효율 부하율은?", o:["25%","50%","75%","100%"], a:1, e:"최대 효율 조건: 철손 = m² × 동손 ➔ 200 = m² × 800 ➔ m=1/2 (50%)"},
+            {lvl: 3, q:"슬립 4%인 3상 유도 전동기의 2차 동손이 400W일 때, 2차 기계적 출력은?", o:["400W","960W","9600W","10000W"], a:2, e:"출력 = 2차동손 × (1-s)/s = 400 × (1-0.04)/0.04 = 9600W"},
+            {lvl: 3, q:"단상 변압기 3대(Δ-Δ) 중 1대가 고장나 V결선 운전 시 출력비는?", o:["50%","57.7%","86.6%","100%"], a:1, e:"Δ결선(3대) 대비 V결선(2대) 출력은 1/√3 ≒ 57.7% 로 감소합니다."},
+            {lvl: 3, q:"콘덴서 뱅크 용량이 몇 kVA 초과 시 과전류 차단기를 설치하는가?", o:["20kVA","50kVA","100kVA","300kVA"], a:1, e:"50kVA를 초과할 경우 반드시 과전류 차단기를 시설합니다."}
+        ],
+        "전자기능사": [
+            {lvl: 1, q:`논리회로 기호 중 다음 그림이 의미하는 게이트는?${svg_nand}`, o:["AND","OR","NAND","NOR"], a:2, e:"AND 게이트(D형태) 출력단에 NOT을 의미하는 버블이 붙은 NAND 게이트입니다."},
+            {lvl: 1, q:`다음 변조 파형은 어떤 변조 방식을 나타낸 것인가?${svg_am}`, o:["진폭 변조 (AM)","주파수 변조 (FM)","위상 변조 (PM)","펄스 폭 변조 (PWM)"], a:0, e:"저주파 신호파에 따라 고주파 반송파의 '진폭'이 변화하는 진폭 변조(AM)입니다."},
+            {lvl: 1, q:"입력이 모두 1일 때만 출력이 1이 되는 논리 게이트는?", o:["OR","AND","NAND","NOR"], a:1, e:"모든 조건이 참일 때 참이 되는 AND 게이트입니다."},
+            {lvl: 1, q:"전원이 꺼져도 내용이 지워지지 않는 메모리는?", o:["ROM","SRAM","DRAM","Cache"], a:0, e:"ROM은 데이터를 영구 보존하는 비휘발성 메모리입니다."},
+            {lvl: 1, q:"2진수 (1011)₂을 10진수로 변환하면?", o:["10","11","12","13"], a:1, e:"8 + 0 + 2 + 1 = 11 입니다."},
+            {lvl: 1, q:"초음파 집진기는 초음파의 어떤 작용을 이용한 것인가?", o:["응집작용","분산작용","확산작용","에멀션화작용"], a:0, e:"초음파 진동으로 미세 먼지를 뭉치게 하는 응집 작용을 이용합니다."},
+            {lvl: 2, q:`오실로스코프 눈금이 다음과 같을 때 파형의 첨두간 전압(Vp-p)은 얼마인가?${svg_osc}`, o:["2V","4V","6V","8V"], a:3, e:"마루(최고점)에서 골(최저점)까지 세로로 총 4칸(DIV)입니다. 4 DIV × 2V = 8V 입니다."},
+            {lvl: 2, q:`그림과 같이 직렬 저항(R)과 병렬 커패시터(C)로 구성된 필터 회로는?${svg_lpf}`, o:["저역 통과 여파기(LPF)","고역 통과 여파기(HPF)","대역 통과 여파기(BPF)","대역 소거 여파기(BEF)"], a:0, e:"주파수가 높아질수록 고주파가 접지로 빠지므로 저주파만 통과시키는 LPF입니다."},
+            {lvl: 2, q:"IC 내 소자 개수가 10개 이하인 소규모 집적 회로는?", o:["SSI","MSI","LSI","VLSI"], a:0, e:"SSI (Small Scale Integration)입니다."},
+            {lvl: 2, q:"J-K 플립플롭으로 D 플립플롭을 구성할 때 J와 K 사이 필요한 게이트는?", o:["NOT","AND","NAND","NOR"], a:0, e:"J와 K에 항상 반대값이 입력되도록 NOT 게이트를 연결합니다."},
+            {lvl: 2, q:"주파수 안정도가 가장 높은 발진 회로는?", o:["RC 발진 회로","콜피츠 발진 회로","하틀리 발진 회로","수정 발진 회로"], a:3, e:"수정편의 압전 효과를 이용하는 수정 발진 회로가 가장 안정적입니다."},
+            {lvl: 2, q:"스택(Stack) 메모리의 자료 처리 방식은?", o:["LIFO (후입선출)","FIFO (선입선출)","Random Access","Sequential Access"], a:0, e:"나중에 입력된 데이터가 먼저 출력되는 LIFO 구조입니다."},
+            {lvl: 2, q:"다음에 실행할 명령어의 번지를 보관하는 레지스터는?", o:["명령 레지스터(IR)","누산기","프로그램 카운터(PC)","데이터 레지스터"], a:2, e:"PC(Program Counter)가 다음 실행 주소를 가리킵니다."},
+            {lvl: 2, q:"아날로그 멀티미터로 저항 측정 전 필수 조작은?", o:["극성 반전","영점 조정(0Ω ADJ)","전압 레인지 전환","전원 ON 측정"], a:1, e:"테스터 봉을 단락시키고 0Ω에 맞추는 영점 조정이 필수입니다."},
+            {lvl: 3, q:`다음 기호가 나타내는 파형 정형 회로의 명칭은?${svg_schmitt}`, o:["적분 회로","미분 회로","시미트 트리거 회로","클리핑 회로"], a:2, e:"히스테리시스 특성을 이용하여 입력 파형을 깨끗한 구형파로 성형하는 시미트 트리거 회로입니다."},
+            {lvl: 3, q:"AM 변조에서 변조도 0.8, 반송파 전력 100W일 때 총 전력은?", o:["100W","116W","132W","164W"], a:2, e:"총 전력 = 100 × (1 + 0.8²/2) = 132W 입니다."},
+            {lvl: 3, q:"주파수 1MHz 전자기파의 파장은 몇 m 인가?", o:["30m","100m","300m","450m"], a:2, e:"파장 = 빛속도(3억m/s) / 주파수(1백만) = 300m 입니다."},
+            {lvl: 3, q:"테브난 정리를 이용한 등가 회로의 구성은?", o:["전압원 1개, 병렬 저항 1개","전류원 1개, 병렬 저항 1개","전압원 1개, 직렬 저항 1개","전류원 1개, 직렬 저항 1개"], a:2, e:"하나의 전압원과 하나의 직렬 저항으로 단순화합니다."},
+            {lvl: 3, q:"어떤 증폭기의 전압 증폭도가 100배일 때, 이를 데시벨(dB)로 나타내면?", o:["10dB","20dB","30dB","40dB"], a:3, e:"전압 이득 dB = 20 * log(100) = 20 * 2 = 40dB 입니다."},
+            {lvl: 3, q:"RC 위상 편이 발진 회로에서 발진을 위한 최소 단의 수는?", o:["1단","2단","3단","4단"], a:2, e:"각 RC단이 60도씩 위상을 지연시켜 총 180도 지연을 만들기 위해 최소 3단이 필요합니다."}
+        ],
+        "승강기기능사": [
+            {lvl: 1, q:`가장 일반적으로 사용되는 승강기 가이드 레일의 단면도이다. 명칭은?${svg_t_rail}`, o:["L형 레일","T형 레일","원형 레일","ㄷ형 레일"], a:1, e:"철제 T자 모양으로 가공되어 튼튼하고 널리 쓰이는 T형 가이드 레일입니다."},
+            {lvl: 1, q:`다음 산업안전보건표지가 나타내는 의미는?${svg_ban}`, o:["지시 표지","경고 표지","금지 표지","안내 표지"], a:2, e:"빨간색 원에 사선이 그어진 형태는 탑승 금지 등을 뜻하는 금지 표지입니다."},
+            {lvl: 1, q:"엘리베이터 정원 산정 시 1인당 기준 하중은?", o:["65kg","70kg","75kg","80kg"], a:2, e:"최신 안전기준 상 1인당 기준 하중은 75kg으로 상향되었습니다."},
+            {lvl: 1, q:"에스컬레이터의 경사도는 일반적으로 몇 도 이하로 하는가?", o:["20도","25도","30도","35도"], a:2, e:"승객 탑승 안전을 위해 경사도는 30도 이하로 규정합니다."},
+            {lvl: 1, q:"와이어 로프 직경이 공칭 직경의 몇 % 초과 감소 시 교체하는가?", o:["3%","5%","7%","10%"], a:2, e:"원래 직경 대비 7% 초과 마모 시 즉시 교체 대상입니다."},
+            {lvl: 1, q:"화재 발생 시 엘리베이터 조치 방법으로 옳은 것은?", o:["대피용 적극 활용","사용 중지 및 피난층 복귀","최상층 이동 개방","전원 즉시 차단"], a:1, e:"승강로는 연기 굴뚝 역할을 하므로 피난층(보통 1층)으로 복귀시켜야 합니다."},
+            {lvl: 1, q:"감전 사고 시 가장 먼저 취해야 할 구조 조치는?", o:["119 신고","인공호흡","전원 스위치 차단","맨 단 구출"], a:2, e:"구조자의 2차 감전 예방을 위해 전원 차단이 최우선입니다."},
+            {lvl: 2, q:`그림이 나타내는 엘리베이터의 로핑(Roping) 방식은?${svg_rope21}`, o:["1:1 로핑 방식","2:1 로핑 방식","3:1 로핑 방식","4:1 로핑 방식"], a:1, e:"로프 끝이 기계실 천장에 고정되고 카 상부 도르래를 거치므로 힘이 2배가 되는 2:1 방식입니다."},
+            {lvl: 2, q:`카가 과속할 경우 기계적으로 이를 감지하는 회전체 안전장치는?${svg_gov}`, o:["권상기","완충기","조속기(Governor)","도어 인터록"], a:2, e:"원심력에 의해 비상정지장치를 작동시키는 조속기입니다."},
+            {lvl: 2, q:"균형추의 중량 계산 공식으로 올바른 것은?", o:["카 자중 + 적재하중","카 자중 + (적재하중 × 오버밸런스율)","(카 자중 + 적재하중) × 오버밸런스율","적재하중 × 오버밸런스율"], a:1, e:"권상 모터 부하 경감을 위해 '카 자중 + (적재하중 × 0.4~0.5)' 로 세팅합니다."},
+            {lvl: 2, q:"엘리베이터 제동기 라이닝과 드럼 사이 갭(Gap)은 보통 몇 mm 인가?", o:["0.1 ~ 0.2 mm","0.5 ~ 1.0 mm","1.0 ~ 2.0 mm","2.0 ~ 3.0 mm"], a:0, e:"제동 시 충격 최소화를 위해 0.1~0.2mm로 아주 좁게 셋팅합니다."},
+            {lvl: 2, q:"카 도어 닫힘 힘은 승객 보호를 위해 최대 몇 N 이하인가?", o:["50 N","100 N","150 N","300 N"], a:2, e:"승객 끼임 부상 방지를 위해 최대 150N (약 15kgf) 이하로 제한합니다."},
+            {lvl: 2, q:"전기 화재(C급 화재) 진압 시 절대 금지하는 소화기는?", o:["이산화탄소 소화기","할론 소화기","건조사","물(포말) 소화기"], a:3, e:"물이나 폼(포말)은 전기가 통하므로 감전 위험이 커 절대 사용해선 안 됩니다."},
+            {lvl: 2, q:"작업자가 회전체(드릴, 선반 등) 작업 시 절대 착용해선 안 되는 것은?", o:["보안경","면장갑","작업복","안전화"], a:1, e:"회전체에 장갑 실오라기가 말려들어가 손가락이 절단될 위험이 매우 큽니다."},
+            {lvl: 3, q:"승강기용 와이어 로프의 꼬임 방식으로 가장 적합한 것은?", o:["랭 꼬임","보통 꼬임","S 꼬임","Z 꼬임"], a:1, e:"마모에는 약간 약하나 형태 안정성이 좋고 꼬임(킹크)이 적은 '보통 꼬임'을 주로 씁니다."},
+            {lvl: 3, q:"T형 가이드 레일 규격(8K, 13K 등)의 기준은?", o:["레일 길이","1m당 중량","밑면 폭","레일 두께"], a:1, e:"규격에 쓰이는 숫자는 단위 길이(1m)당 중량(kg)을 뜻합니다."},
+            {lvl: 3, q:"에스컬레이터의 구동기에 있는 안전장치 중, 체인이 끊어졌을 때 역주행을 방지하는 장치는?", o:["스커트 가드 스위치","구동체인 안전스위치","스텝 체인 안전스위치","핸드레일 안전스위치"], a:1, e:"모터와 스텝을 연결하는 메인 구동 체인이 끊어지면 작동하는 구동체인 안전장치입니다."},
+            {lvl: 3, q:"유압식 엘리베이터에서 실린더 내의 압력이 이상 상승할 때 압력을 빼주는 밸브는?", o:["체크 밸브","스톱 밸브","릴리프 밸브","다운 밸브"], a:2, e:"시스템 보호를 위해 설정 압력 이상이 되면 기름을 탱크로 돌려보내는 안전밸브(릴리프 밸브)입니다."},
+            {lvl: 3, q:"승강장 문이 열린 상태에서 카가 움직이는 것을 방지하기 위한 안전장치는?", o:["도어 인터록","파킹 스위치","도어 클로저","조속기 스위치"], a:0, e:"문이 완전히 닫히고 잠기지 않으면 안전 회로를 차단하는 도어 인터록입니다."},
+            {lvl: 3, q:"카 상부 수리 작업 시 지켜야 할 안전 수칙으로 가장 거리가 먼 것은?", o:["안전모 착용","작업등 점등","자동 운전 모드로 둔 채 작업","안전대(안전벨트) 착용"], a:2, e:"카 상부 작업 시에는 반드시 카 상부 조작반을 '수동(검사) 운전' 모드로 전환해야 합니다."}
+        ]
+    };
+
+    const usersInfo = {
+        'soonjae': '권순재',
+        'wonjae': '허원재',
+        'seongyun': '방성윤',
+        'eunseong': '이은성',
+        'guest': '비회원' 
+    };
+
+    let currentUser = null;
+    let currentExamId = null;
+    
+    let userDb = JSON.parse(localStorage.getItem('cbtUserDb')) || {
+        soonjae: {}, wonjae: {}, seongyun: {}, eunseong: {}, guest: {}
+    };
+
+    function toggleHistoryPanel(action) {
+        const panel = document.getElementById('history-panel');
+        const btn = document.getElementById('history-toggle-btn');
+        
+        if (action === 'show') {
+            panel.classList.add('open');
+            btn.style.right = '-150px'; 
+        } else if (action === 'hide') {
+            panel.classList.remove('open');
+            btn.style.right = '0'; 
+        } else {
+            if (panel.classList.contains('open')) {
+                panel.classList.remove('open');
+                btn.style.right = '0';
+            } else {
+                panel.classList.add('open');
+                btn.style.right = '-150px';
+            }
+        }
+    }
+
+    function updateHistoryPanel() {
+        const content = document.getElementById('history-content');
+        content.innerHTML = '';
+        
+        let hasRecord = false;
+        
+        ['전기기능사', '전자기능사', '승강기기능사'].forEach(examId => {
+            let record = userDb[currentUser][examId];
+            if (record && record.history && record.history.length > 0) {
+                hasRecord = true;
+                let html = `<div class="history-item">
+                                <div class="history-item-title">📋 ${examId}</div>`;
+                
+                let recentHistory = [...record.history].reverse().slice(0, 5);
+                recentHistory.forEach(h => {
+                    let isPass = h.score >= 60;
+                    let passClass = isPass ? 'pass' : 'fail';
+                    let passText = isPass ? '<span class="pass-text">합격</span>' : '<span class="fail-text">탈락</span>';
+                    html += `<div class="history-record ${passClass}">
+                                [${h.date}] <strong>${h.score}점</strong> - ${passText}
+                             </div>`;
+                });
+                html += `</div>`;
+                content.innerHTML += html;
+            }
+        });
+
+        if (!hasRecord) {
+            content.innerHTML = '<div style="color: var(--muted-color); font-size: 14px; text-align: center; margin-top: 30px;">아직 응시 기록이 없어요.<br>지금 바로 모의고사에 도전해보세요!</div>';
+        }
+    }
+
+    function login() {
+        const inputId = document.getElementById('userid').value.trim().toLowerCase();
+        if (usersInfo[inputId]) {
+            currentUser = inputId;
+            if(!userDb[currentUser]) userDb[currentUser] = {};
+            
+            document.getElementById('user-greeting').innerText = `${usersInfo[currentUser]} 조원 접속됨`;
+            document.getElementById('user-greeting').style.display = 'inline-block';
+            document.getElementById('logout-btn').style.display = 'inline-block';
+            document.getElementById('header-status').style.display = 'inline-block';
+            
+            initApp();
+            showScreen('exam-select-screen');
+
+            document.getElementById('history-toggle-btn').style.display = 'block';
+            updateHistoryPanel();
+            setTimeout(() => { toggleHistoryPanel('show'); }, 300); 
+            
+        } else {
+            alert('등록되지 않은 아이디야! (soonjae, wonjae, seongyun, eunseong 중 하나를 입력해)');
+        }
+    }
+
+    function loginAsGuest() {
+        currentUser = 'guest';
+        if(!userDb[currentUser]) userDb[currentUser] = {};
+        
+        document.getElementById('user-greeting').innerText = `비회원 접속됨`;
+        document.getElementById('user-greeting').style.display = 'inline-block';
+        document.getElementById('logout-btn').style.display = 'inline-block';
+        document.getElementById('header-status').style.display = 'inline-block';
+        
+        initApp();
+        showScreen('exam-select-screen');
+
+        document.getElementById('history-toggle-btn').style.display = 'block';
+        updateHistoryPanel();
+        setTimeout(() => { toggleHistoryPanel('show'); }, 300); 
+    }
+
+    function logout() {
+        currentUser = null;
+        document.getElementById('user-greeting').style.display = 'none';
+        document.getElementById('logout-btn').style.display = 'none';
+        document.getElementById('home-btn').style.display = 'none';
+        document.getElementById('header-status').style.display = 'none';
+        document.getElementById('userid').value = '';
+        
+        document.getElementById('history-toggle-btn').style.display = 'none';
+        toggleHistoryPanel('hide');
+
+        showScreen('login-screen');
+    }
+
+    let currentSubjectPool = []; 
+    let askedQuestions = [];     
+    let userAnswers = [];        
+    let currentIdx = 0;          
+    let currentLvl = 1;          
+
+    let timerInterval;
+    let timeLeft = 60;
+    const MAX_TIME = 60;
+
+    function showScreen(screenId) {
+        document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+        document.getElementById(screenId).classList.add('active');
+    }
+
+    function goHome() {
+        clearInterval(timerInterval);
+        document.getElementById('timer-container').style.display = 'none';
+        document.getElementById('quiz-footer').style.display = 'none';
+        document.getElementById('home-btn').style.display = 'none';
+        document.getElementById('header-status').innerText = '대기 중';
+        document.getElementById('main-container').classList.remove('danger-mode');
+        
+        initApp(); 
+        showScreen('exam-select-screen');
+
+        updateHistoryPanel();
+        document.getElementById('history-toggle-btn').style.display = 'block';
+        setTimeout(() => { toggleHistoryPanel('show'); }, 300);
+    }
+
+    function initApp() {
+        const exams = [
+            { id: "전기기능사", class: "elec", icon: "⚡" },
+            { id: "전자기능사", class: "electro", icon: "💻" },
+            { id: "승강기기능사", class: "elev", icon: "🏢" }
+        ];
+        
+        const container = document.getElementById('exam-btn-container');
+        container.innerHTML = '';
+        
+        exams.forEach((exam) => {
+            const btn = document.createElement('button');
+            btn.className = `exam-btn ${exam.class}`;
+            
+            let statusBadge = "";
+            let record = userDb[currentUser][exam.id];
+            
+            if (record && record.completed) {
+                let displayScore = record.bestScore;
+                if (displayScore <= 20) { displayScore *= 5; } 
+
+                let passFailStr = displayScore >= 60 ? "<span style='color:#2ecc71;'>(합격)</span>" : "<span style='color:#e74c3c;'>(불합격)</span>";
+                statusBadge = `<br><span class='status-text'>[내 최고 점수: ${displayScore}점 ${passFailStr}]</span>`;
+            }
+
+            btn.innerHTML = `${exam.icon} ${exam.id} CBT 모의고사 ${statusBadge}`;
+            btn.onclick = () => startAdaptiveTest(exam.id);
+            container.appendChild(btn);
+        });
+    }
+
+    function startAdaptiveTest(examId) {
+        toggleHistoryPanel('hide');
+        document.getElementById('history-toggle-btn').style.display = 'none';
+
+        currentExamId = examId;
+        currentSubjectPool = [...db[examId]];
+        askedQuestions = [];
+        userAnswers = [];
+        currentIdx = 0;
+        currentLvl = 1; 
+
+        document.getElementById('header-status').innerText = `${examId}`;
+        document.getElementById('home-btn').style.display = 'block'; 
+        document.getElementById('quiz-footer').style.display = 'flex';
+        
+        showScreen('quiz-screen');
+        pickNextQuestion(undefined); 
+        renderQuestion();
+    }
+
+    function pickNextQuestion(isLastCorrect) {
+        let targetLvl = 1;
+        if (isLastCorrect === undefined) targetLvl = 1; 
+        else if (isLastCorrect === true) targetLvl = 3; 
+        else {
+            if (currentLvl === 3) targetLvl = 2; 
+            else targetLvl = 1; 
+        }
+
+        let candidates = currentSubjectPool.filter(q => q.lvl === targetLvl);
+
+        if (candidates.length === 0 && currentSubjectPool.length > 0) {
+            let sorted = [...currentSubjectPool].sort((a, b) => Math.abs(a.lvl - targetLvl) - Math.abs(b.lvl - targetLvl));
+            let bestDiff = Math.abs(sorted[0].lvl - targetLvl);
+            candidates = sorted.filter(q => Math.abs(q.lvl - targetLvl) === bestDiff);
+        }
+
+        if (candidates.length > 0) {
+            const randIdx = Math.floor(Math.random() * candidates.length);
+            const selectedQ = candidates[randIdx];
+            currentSubjectPool = currentSubjectPool.filter(q => q !== selectedQ);
+            askedQuestions.push(selectedQ);
+            currentLvl = selectedQ.lvl;
+        }
+    }
+
+    function startTimer() {
+        clearInterval(timerInterval);
+        timeLeft = MAX_TIME;
+        
+        const timerContainer = document.getElementById('timer-container');
+        const timerBar = document.getElementById('timer-bar');
+        const timerText = document.getElementById('timer-text');
+        const mainContainer = document.getElementById('main-container');
+
+        timerContainer.style.display = 'block';
+        mainContainer.classList.remove('danger-mode');
+        
+        timerBar.style.width = '0%';
+        timerBar.style.backgroundColor = '#2ecc71'; 
+        timerText.style.color = ""; 
+
+        timerInterval = setInterval(() => {
+            timeLeft--;
+            
+            let m = Math.floor(timeLeft / 60);
+            let s = timeLeft % 60;
+            timerText.innerText = `0${m}:${s < 10 ? '0' + s : s}`;
+
+            let percentFilled = ((MAX_TIME - timeLeft) / MAX_TIME) * 100;
+            timerBar.style.width = `${percentFilled}%`;
+
+            if (timeLeft <= 30 && timeLeft > 10) {
+                timerBar.style.backgroundColor = '#f39c12'; 
+            } else if (timeLeft <= 10) {
+                timerBar.style.backgroundColor = '#e74c3c'; 
+                timerText.style.color = "#fff"; 
+                mainContainer.classList.add('danger-mode'); 
+            }
+
+            if (timeLeft <= 0) {
+                clearInterval(timerInterval);
+                triggerExplosion(); 
+            }
+        }, 1000);
+    }
+
+    function triggerExplosion() {
+        const mainContainer = document.getElementById('main-container');
+        const explosionScreen = document.getElementById('explosion-screen');
+
+        mainContainer.classList.add('shake-effect');
+        explosionScreen.style.display = 'flex'; 
+
+        setTimeout(() => {
+            mainContainer.classList.remove('shake-effect');
+            mainContainer.classList.remove('danger-mode');
+            explosionScreen.style.display = 'none';
+            timeOutHandler(); 
+        }, 1500);
+    }
+
+    function timeOutHandler() {
+        userAnswers[currentIdx] = -1; 
+        
+        const correctIndex = askedQuestions[currentIdx].a;
+        const radios = document.getElementsByName('q-option');
+        radios.forEach(r => {
+            r.disabled = true;
+            r.parentElement.classList.add('disabled');
+        });
+
+        const correctLabel = document.getElementById(`opt-label-${correctIndex}`);
+        if(correctLabel) correctLabel.classList.add('correct');
+
+        document.getElementById('exp-text').innerHTML = askedQuestions[currentIdx].e;
+        document.getElementById('explanation').style.display = 'block';
+
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.disabled = false;
+        if (currentIdx === 19) {
+            nextBtn.innerText = "제출 및 채점";
+            nextBtn.style.backgroundColor = "#2ecc71"; 
+        } else {
+            nextBtn.innerText = "다음 문제 ▶";
+            nextBtn.style.backgroundColor = "#3498db"; 
+        }
+    }
+
+    function renderQuestion() {
+        const qData = askedQuestions[currentIdx];
+        
+        const diffBadge = document.getElementById('q-difficulty');
+        diffBadge.className = 'difficulty-badge';
+        if (qData.lvl === 1) { diffBadge.innerText = '★☆☆ 기초'; diffBadge.classList.add('diff-easy'); }
+        else if (qData.lvl === 2) { diffBadge.innerText = '★★☆ 응용'; diffBadge.classList.add('diff-medium'); }
+        else { diffBadge.innerText = '★★★ 킬러'; diffBadge.classList.add('diff-hard'); }
+
+        document.getElementById('q-text').innerHTML = `${currentIdx + 1}. ${qData.q}`;
+        document.getElementById('progress-text').innerText = `${currentIdx + 1} / 20`;
+        
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.disabled = true;
+        nextBtn.innerText = "정답을 선택하세요";
+        nextBtn.style.backgroundColor = "#95a5a6"; 
+
+        const optionsList = document.getElementById('options-list');
+        optionsList.innerHTML = '';
+
+        const numSymbols = ['①', '②', '③', '④'];
+        qData.o.forEach((optText, i) => {
+            const li = document.createElement('li');
+            const label = document.createElement('label');
+            label.className = 'option-label';
+            label.id = `opt-label-${i}`;
+            
+            const radio = document.createElement('input');
+            radio.type = 'radio';
+            radio.name = 'q-option';
+            radio.value = i;
+            radio.onchange = () => selectOption(i);
+
+            label.appendChild(radio);
+            label.appendChild(document.createTextNode(` ${numSymbols[i]} ${optText}`));
+            li.appendChild(label);
+            optionsList.appendChild(li);
+        });
+
+        document.getElementById('explanation').style.display = 'none';
+        
+        startTimer();
+    }
+
+    function selectOption(selectedIndex) {
+        clearInterval(timerInterval);
+        document.getElementById('main-container').classList.remove('danger-mode');
+
+        userAnswers[currentIdx] = selectedIndex;
+
+        const correctIndex = askedQuestions[currentIdx].a;
+        const radios = document.getElementsByName('q-option');
+        radios.forEach(r => {
+            r.disabled = true;
+            r.parentElement.classList.add('disabled');
+        });
+
+        const selectedLabel = document.getElementById(`opt-label-${selectedIndex}`);
+        const correctLabel = document.getElementById(`opt-label-${correctIndex}`);
+
+        if (selectedIndex === correctIndex) {
+            selectedLabel.classList.add('correct');
+        } else {
+            selectedLabel.classList.add('incorrect');
+            correctLabel.classList.add('correct');
+        }
+
+        document.getElementById('exp-text').innerHTML = askedQuestions[currentIdx].e;
+        document.getElementById('explanation').style.display = 'block';
+
+        const nextBtn = document.getElementById('next-btn');
+        nextBtn.disabled = false;
+        if (currentIdx === 19) {
+            nextBtn.innerText = "제출 및 채점";
+            nextBtn.style.backgroundColor = "#2ecc71"; 
+        } else {
+            nextBtn.innerText = "다음 문제 ▶";
+            nextBtn.style.backgroundColor = "#3498db"; 
+        }
+    }
+
+    function goNext() {
+        const isCorrect = (userAnswers[currentIdx] === askedQuestions[currentIdx].a);
+
+        if (currentIdx < 19) { 
+            pickNextQuestion(isCorrect); 
+            currentIdx++; 
+            renderQuestion(); 
+        } else { 
+            showResult(); 
+        }
+    }
+
+    function showResult() {
+        clearInterval(timerInterval);
+        document.getElementById('timer-container').style.display = 'none';
+        document.getElementById('main-container').classList.remove('danger-mode');
+
+        let correctCount = 0;
+        for (let i = 0; i < askedQuestions.length; i++) {
+            if (userAnswers[i] === askedQuestions[i].a) correctCount++;
+        }
+
+        let totalPoints = correctCount * 5;
+
+        let now = new Date();
+        let mStr = now.getMinutes() < 10 ? '0' + now.getMinutes() : now.getMinutes();
+        let timeStr = `${now.getMonth() + 1}월 ${now.getDate()}일 ${now.getHours()}시 ${mStr}분`;
+
+        if(!userDb[currentUser][currentExamId]) {
+            userDb[currentUser][currentExamId] = { completed: true, bestScore: totalPoints, history: [] };
+        }
+        
+        if(!userDb[currentUser][currentExamId].history) {
+            userDb[currentUser][currentExamId].history = [];
+        }
+
+        userDb[currentUser][currentExamId].history.push({ score: totalPoints, date: timeStr });
+
+        let prevBest = userDb[currentUser][currentExamId].bestScore;
+        if (prevBest <= 20) prevBest *= 5;
+        
+        if(totalPoints > prevBest) {
+            userDb[currentUser][currentExamId].bestScore = totalPoints;
+        } else {
+            userDb[currentUser][currentExamId].bestScore = prevBest; 
+        }
+        
+        localStorage.setItem('cbtUserDb', JSON.stringify(userDb));
+
+        document.getElementById('quiz-footer').style.display = 'none';
+        document.getElementById('header-status').innerText = "시험 종료";
+        document.getElementById('final-score').innerText = `${totalPoints} 점`;
+        
+        const msg = document.getElementById('result-msg');
+        
+        if (totalPoints >= 60) {
+            if (totalPoints >= 90) {
+                msg.innerHTML = "🎉 <strong>[합격]</strong> 완벽해! 압도적인 점수로 합격이야!";
+                msg.style.color = "#2ecc71";
+            } else {
+                msg.innerHTML = "🎉 <strong>[합격]</strong> 합격선 통과! 이 기세로 실전도 부숴보자!";
+                msg.style.color = "#3498db";
+            }
+        } else {
+            msg.innerHTML = "💀 <strong>[불합격 / 탈락]</strong><br>60점(12문제) 이상 맞혀야 합격인데... 탈락이야!<br>이대로면 실제 시험에서도 위험해. 꼼꼼히 다시 공부하자!";
+            msg.style.color = "#e74c3c";
+        }
+
+        showScreen('result-screen');
+    }
+
+    function resetAndRetake() {
+        startAdaptiveTest(currentExamId);
+    }
+</script>
+
+</body>
+</html>
